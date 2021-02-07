@@ -1,0 +1,53 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+from IPython.display import display
+from IPython.display import display_html
+
+def display_side_by_side(*args):
+    html_str=''
+    for df in args:
+        html_str+=df.to_html()
+    display_html(html_str.replace('table','table style="display:inline"'),raw=True)
+    
+df_train = pd.read_csv("Titanic_train.csv")
+df_test = pd.read_csv("Titanic_test.csv")
+
+
+# Q1
+print(df_test.columns)
+print(df_train.columns)
+
+# Q2
+
+print("資料筆數=",df_test.shape)
+print(df_test.isnull().any())
+print(df_test.isnull().any().sum())
+
+#合併資料
+data = df_train.append(df_test)
+
+print(data.info())
+
+print('cabin 遺失個數=',data['Cabin'].isnull().sum())
+
+
+# 以 Cabin 為例，先看 Cabin 出現值的特性
+print(data["Cabin"].value_counts())
+
+方法1:遺失的屬於另一類。 
+data['Cabin'].head(10)
+data["Cabin"] = data['Cabin'].apply(lambda x : str(x)[0] if not pd.isnull(x) else 'NoCabin')
+data["Cabin"].unique()
+
+# 調整後的 Cabin 觀察遺失的樣態
+sns.countplot(data['Cabin'], hue=data['Survived'])
+#結論，遺失的死亡率比較高
+
+
+#數值計算
+data[['Cabin', 'Survived']].groupby(['Cabin'], as_index=False).mean().sort_values(by='Survived', ascending=False)
+# NoCabin的比例和 T 較接近
